@@ -5,7 +5,7 @@
     "private": true,
     "scripts": {
         "build": "webpack",
-        "yeet": "webpack-dev-server --open"
+        "test": "webpack-dev-server --open"
     },
     "author": "Minh Vu",
     "license": "Me Biiitch",

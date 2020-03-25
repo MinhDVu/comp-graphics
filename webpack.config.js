@@ -1,16 +1,18 @@
-const HtmlWebpackPlugin = require('html-webpack-plugin');
 const path = require('path');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 
+// TODO: Handle multiple content output
 module.exports = {
     mode: 'development',
     entry: './src/index.js',
     devServer: {
         contentBase: './dist',
-        https: true,
     },
     plugins: [
+        new CleanWebpackPlugin(),
         new HtmlWebpackPlugin({
-            title: 'HTML Output',
+            title: "Minh's Test Environment",
         }),
     ],
     output: {
