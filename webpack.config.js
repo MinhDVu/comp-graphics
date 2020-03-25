@@ -5,18 +5,29 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 // TODO: Handle multiple content output
 module.exports = {
     mode: 'development',
-    entry: './src/index.js',
+    entry: {
+        main: './src/scripts/index.js',
+        test: './src/scripts/test.js'
+    },
     devServer: {
-        contentBase: './dist',
+        contentBase: './test',
     },
     plugins: [
         new CleanWebpackPlugin(),
         new HtmlWebpackPlugin({
-            title: "Minh's Test Environment",
+            minify: true,
+            title: "Minh's Index Environment",
+            template: './src/index.html',
+            filename: './dist/index.html',
         }),
+        new HtmlWebpackPlugin({
+            minify: true,
+            title: "Test Environment",
+            template: './src/index.html',
+            filename: './dist/settings.html'
+        })
     ],
     output: {
-        filename: 'main.js',
-        path: path.resolve(__dirname, 'dist'),
+        filename: '[name].js'
     },
 };
