@@ -1,13 +1,21 @@
-const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 
-// TODO: Handle multiple content output
+// TODO: Handle multiple content output url
 module.exports = {
     mode: 'development',
     entry: {
         main: './src/scripts/index.js',
         test: './src/scripts/test.js'
+    },
+    module: {
+        rules: [
+            {
+                test: /\.js$/,
+                exclude: /node_modules/,
+                loader: 'eslint-loader',
+            }
+        ],
     },
     devServer: {
         contentBase: './test',
