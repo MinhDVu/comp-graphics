@@ -5,7 +5,7 @@
     "private": true,
     "scripts": {
         "build": "webpack",
-        "lint": "eslint ./src/scripts/**",
+        "lint": "eslint ./src/**",
         "test": "webpack-dev-server --open"
     },
     "author": "Minh Vu",

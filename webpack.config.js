@@ -5,8 +5,7 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 module.exports = {
     mode: 'development',
     entry: {
-        main: './src/scripts/index.js',
-        test: './src/scripts/test.js'
+        main: './src/index.js'
     },
     module: {
         rules: [
@@ -24,18 +23,10 @@ module.exports = {
         new CleanWebpackPlugin(),
         new HtmlWebpackPlugin({
             minify: true,
-            title: "Minh's Index Environment",
-            template: './src/index.html',
-            filename: './dist/index.html',
-        }),
-        new HtmlWebpackPlugin({
-            minify: true,
-            title: "Test Environment",
-            template: './src/index.html',
-            filename: './dist/settings.html'
+            title: "Test Environment"
         })
     ],
     output: {
-        filename: '[name].js'
+        filename: 'index.js'
     },
 };

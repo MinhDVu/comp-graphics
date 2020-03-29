@@ -27,9 +27,9 @@ Okay sure, but here are some general rules for contributing to this repo
 
 - Write short and meaningful commit messages. Example:
     > Feature: Added camera movement functionality
-<br>
+
     > Bugfix: Fix infinite zoom in bug on mouse scroll
-<br>
+
     > Chore: Code refactoring, fix linting errors
 
 - Merge the latest commits from master into feature branch when making a [pull request](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/about-pull-requests)
