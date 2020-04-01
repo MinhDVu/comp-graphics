@@ -32,7 +32,7 @@
         "no-undefined": 2,
         "no-unreachable": 2,
         "no-unused-expressions": 2,
-        "no-unused-vars": 2,
+        "no-unused-vars": 1,
         "no-use-before-define": 2,
         "semi-spacing": [1, {"before": false, "after": true}],
         "space-before-blocks": [1, "always"],

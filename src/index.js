@@ -1,25 +1,27 @@
-import addOne from './utility';
+import * as THREE from 'three';
+import { createCube } from './utility';
 
-function getComponent() {
-    const element = document.createElement('div');
-    element.innerHTML = 'This is a barebone project with some form on asset bundeling (if I know what im doing, which I dont, really)'
-    element.style.textAlign = 'center';
-    element.style.fontSize = '24px';
+let scene = new THREE.Scene();
+let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 
-    const utilityButton = document.createElement('div');
-    utilityButton.innerHTML = '<div><button>Click me!</button></div>';
+let renderer = new THREE.WebGLRenderer();
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
 
-    const counter = document.createElement('div');
-    counter.innerHTML = 'Click button to change me'
+// Use createCube() function from utility.js
+let cube = createCube();
 
-    utilityButton.addEventListener('click', () => {
-        counter.innerText = addOne(counter.innerText);
-    });
+scene.add(cube);
 
-    element.insertAdjacentElement('afterbegin', counter);
-    element.insertAdjacentElement('beforeend', utilityButton);
+camera.position.z = 5;
 
-    return element;
-}
+let animate = function () {
+    requestAnimationFrame(animate);
 
-document.body.appendChild(getComponent());
+    cube.rotation.x += 0.01;
+    cube.rotation.y += 0.01;
+
+    renderer.render(scene, camera);
+};
+
+animate();
