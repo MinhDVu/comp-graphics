@@ -4,7 +4,7 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 module.exports = {
     mode: 'development',
     entry: {
-        main: './src/index.js'
+        main: './src/index.js',
     },
     module: {
         rules: [
@@ -12,7 +12,18 @@ module.exports = {
                 test: /\.js$/,
                 exclude: /node_modules/,
                 loader: 'eslint-loader',
-            }
+            },
+            {
+                test: /\.ply/i,
+                use: [
+                    {
+                        loader: 'file-loader',
+                        options: {
+                            limit: false
+                        },
+                    },
+                ],
+            },
         ],
     },
     devServer: {
@@ -22,10 +33,10 @@ module.exports = {
         new CleanWebpackPlugin(),
         new HtmlWebpackPlugin({
             minify: true,
-            title: "Test Environment"
-        })
+            title: 'Test Environment',
+        }),
     ],
     output: {
-        filename: 'index.js'
+        filename: 'index.js',
     },
 };
