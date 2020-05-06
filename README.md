@@ -6,7 +6,7 @@ This project is aimed at creating a better dev environment for Computer Graphics
 2. Download [NodeJS](https://nodejs.org/en/download/) (This is a runtime for developing and building this project). This will also install npm by defaul. Confirm it's installed by typing `node -v` and `npm -v` in your CLI, the installed version will be printed
 3. Open the repo on your IDE (I prefer VSCode since it's open source, has great features, and lots of customsations)
 4. Run `npm i` to install the node packages this project needs to function (node packages are modules/libraries of pre-defined functions that you can import into your project)
-5. Run `npm run test` to host your project on http://localhost:8080. This webpage is compiled from your project and has browser-sync enabled, meaning if you update your script, it will recompile and reload the website automatically.
+5. Run `npm run start` to host your project on http://localhost:8080. This webpage is compiled from your project and has browser-sync enabled, meaning if you update your script, it will recompile and reload the website automatically.
 
 ## Contributing
 Don't.
