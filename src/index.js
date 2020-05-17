@@ -1,125 +1,88 @@
 import * as THREE from 'three';
-let OrbitControls = require('three-orbit-controls')(THREE);
-const PLYLoader = require('threejs-ply-loader')(THREE);
+import * as dat from 'dat.gui';
+import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader';
+import { MTLLoader } from 'three/examples/jsm/loaders/MTLLoader';
+const OrbitControls = require('three-orbit-controls')(THREE);
 
-import bunny from '../src/modules/bunny.ply';
+// Import utility functions from utility.js
 
-var scene = new THREE.Scene();
-var renderer = new THREE.WebGLRenderer();
+// 3D modules import
+import islandObjPath from './modules/island.obj';
+import islandMtlPath from './modules/island.mtl';
 
+// Reset default CSS
+const stylesheet = document.createElement('style');
+stylesheet.type = 'text/css';
+stylesheet.innerText = `body{margin: 0;overflow:hidden}canvas{width: 100%;height: 100%;}`;
+document.head.appendChild(stylesheet);
+
+// Scene Rendering, Camera and Orbit Control
+const scene = new THREE.Scene();
+const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
-
 document.body.appendChild(renderer.domElement);
+const ratio = window.innerWidth / window.innerHeight;
+const camera = new THREE.PerspectiveCamera(45, ratio, 0.1, 1000);
+camera.position.set(0, 10, 30);
+// eslint-disable-next-line no-unused-vars
+const control = new OrbitControls(camera);
 
-var ratio = window.innerWidth / window.innerHeight;
-var camera = new THREE.PerspectiveCamera(45, ratio, 0.1, 1000);
-camera.position.set(0, 0, 20);
-camera.lookAt(0, 0, 1);
-
-var materialFloor = new THREE.MeshLambertMaterial();
-materialFloor.color = new THREE.Color(0.8, 0.8, 1.0);
-materialFloor.side = THREE.DoubleSide;
-
-var geometryPlane = new THREE.PlaneGeometry(10, 10, 10, 10);
-var floorMesh = new THREE.Mesh(geometryPlane, materialFloor);
-scene.add(floorMesh);
-
-let controls = new OrbitControls(camera, renderer.domElement);
-
-var cameralight = new THREE.PointLight(new THREE.Color(1, 1, 1), 0.5);
+// Basic Lighting
+const cameralight = new THREE.PointLight(new THREE.Color(1, 1, 1), 0.8);
+cameralight.castShadow = true;
 camera.add(cameralight);
 scene.add(camera);
 
-var ambientlight = new THREE.AmbientLight(new THREE.Color(1, 1, 1), 0.2);
-scene.add(ambientlight);
+// Ambient Lighting
+const ambientLight = new THREE.AmbientLight(new THREE.Color(1, 1, 1), 0.3);
+scene.add(ambientLight);
 
-//MESH LOADING
-var loader = new PLYLoader();
-var mesh = null;
-loader.load(bunny, function (geometry) {
-    geometry.computeVertexNormals();
-    geometry.computeBoundingBox();
+// Declare scene control variables here (ie: number of trees, color of leaves)
+let numberOfTrees = 1;
+let colorOfLeaves = '#2dc89b';
+let islandRotationSpeed = 0.5;
 
-    var center = geometry.boundingBox.getCenter();
-    var size = geometry.boundingBox.getSize();
-    var min = geometry.boundingBox.min;
+// Scene GUI. Should use variables from above
+const gui = new dat.GUI();
+const params = {
+    numberOfTrees: numberOfTrees,
+    colorOfLeaves: colorOfLeaves,
+    plainRotationSpeed: islandRotationSpeed,
+};
 
-    var sca = new THREE.Matrix4();
-    var tra = new THREE.Matrix4();
+// Prefer onFinishChange() to reduce re-render calls. If change is immediate use onChange()
+gui.add(params, 'plainRotationSpeed', 0.5, 5).onFinishChange(val => {
+    islandRotationSpeed = val;
+});
+gui.add(params, 'numberOfTrees', 1, 10).onFinishChange(val => {
+    // Set # of trees
+    console.log(val);
+});
+gui.addColor(params, 'colorOfLeaves').onChange(val => {
+    // Set color of leaves
+    console.log(val);
+});
+gui.open();
 
-    var ScaleFact = 5 / size.length();
-    sca.makeScale(ScaleFact, ScaleFact, ScaleFact);
-    //tra.makeTranslation (-center.x,-center.y,-min.z);
-    tra.makeTranslation(-center.x, -center.y, -min.z);
+// Declare & Add Objects to Scene here. You can also attach objects to each other and only add the parent object to the scene
+const objLoader = new OBJLoader();
+const mtlLoader = new MTLLoader();
 
-    var material = new THREE.MeshPhongMaterial();
-    material.color = new THREE.Color(0.9, 0.9, 0.9);
-    material.shininess = 100;
-    mesh = new THREE.Mesh(geometry, material);
+let islandObject = new THREE.Group();
 
-    mesh.applyMatrix(tra);
-    mesh.applyMatrix(sca);
+mtlLoader.load(islandMtlPath, materials => {
+    materials.preload();
 
-    mesh.name = 'loaded_mesh';
-
-    scene.add(mesh);
+    objLoader.setMaterials(materials).load(islandObjPath, object => {
+        islandObject = object;
+        scene.add(islandObject);
+    });
 });
 
-var MyUpdateLoop = function () {
+// Scene Animation (called 60 times/sec). This should call other functions that updates objects
+function animate() {
+    requestAnimationFrame(animate);
+    islandObject.rotateY(islandRotationSpeed / 100);
     renderer.render(scene, camera);
-    requestAnimationFrame(MyUpdateLoop);
-};
-
-requestAnimationFrame(MyUpdateLoop);
-
-var raycaster = new THREE.Raycaster();
-
-var selectedObj = false;
-
-function onDocumentMouseDown(event) {
-    var mouse = new THREE.Vector2();
-    mouse.x = (event.clientX / renderer.domElement.clientWidth) * 2 - 1;
-    mouse.y = (-event.clientY / renderer.domElement.clientHeight) * 2 + 1;
-
-    raycaster.setFromCamera(mouse, camera);
-
-    var intersects = raycaster.intersectObjects(scene.children, false);
-
-    if (intersects.length > 0) {
-        if (intersects[0].object.name == 'loaded_mesh' && !selectedObj) {
-            console.log('Selected!');
-            //var FaceI=intersects[ 0 ].face;
-            intersects[0].object.material.color = new THREE.Color(1, 0.5, 0.5);
-            selectedObj = true;
-        }
-        if (intersects[0].object.name != 'loaded_mesh' && selectedObj) {
-            mesh.material.color = new THREE.Color(0.9, 0.9, 0.9);
-            var pos = intersects[0].point;
-            console.log('Placed!');
-            mesh.position.x = pos.x;
-            mesh.position.y = pos.y;
-            selectedObj = false;
-        }
-    }
 }
-
-// when the mouse is clicked, call the given function
-document.addEventListener('mousedown', onDocumentMouseDown, false);
-
-//this function is called when the window is resized
-var MyResize = function () {
-    //get the new sizes
-    var width = window.innerWidth;
-    var height = window.innerHeight;
-    //then update the renderer
-    renderer.setSize(width, height);
-    //and update the aspect ratio of the camera
-    camera.aspect = width / height;
-    //update the projection matrix given the new values
-    camera.updateProjectionMatrix();
-
-    //and finally render the scene again
-    renderer.render(scene, camera);
-};
-//link the resize of the window to the update of the camera
-window.addEventListener('resize', MyResize);
+animate();

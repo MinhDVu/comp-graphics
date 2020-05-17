@@ -14,12 +14,12 @@ module.exports = {
                 loader: 'eslint-loader',
             },
             {
-                test: /\.ply/i,
+                test: /\.(ply|obj|mtl)/i,
                 use: [
                     {
                         loader: 'file-loader',
                         options: {
-                            limit: false
+                            limit: false,
                         },
                     },
                 ],

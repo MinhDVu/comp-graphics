@@ -1,9 +1,11 @@
-import * as THREE from 'three';
+import { BoxGeometry, MeshLambertMaterial, Mesh } from 'three';
 
-export function createCube() {
-    let geometry = new THREE.BoxGeometry();
-    let material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-    let cube = new THREE.Mesh(geometry, material);
+// This file should be used to initilize complex 3D objects. All functions must return a value and have export at the start of line
+export function createPlane(color) {
+    const cube = new Mesh(
+        new BoxGeometry(100, 100, 1),
+        new MeshLambertMaterial({ color: color })
+    );
 
     return cube;
 }
