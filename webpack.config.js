@@ -14,7 +14,7 @@ module.exports = {
                 loader: 'eslint-loader',
             },
             {
-                test: /\.(ply|obj|mtl)/i,
+                test: /\.(ply|obj|mtl|png|jpg)/i,
                 use: [
                     {
                         loader: 'file-loader',

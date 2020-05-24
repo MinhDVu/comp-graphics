@@ -7,8 +7,9 @@ const OrbitControls = require('three-orbit-controls')(THREE);
 // Import utility functions from utility.js
 
 // 3D modules import
-import islandObjPath from './modules/island.obj';
-import islandMtlPath from './modules/island.mtl';
+import islandObjPath from './models/island.obj';
+import islandMtlPath from './models/island.mtl';
+import { createSkyboxNight, createSkyboxDay } from './skyboxHelper';
 
 // Reset default CSS
 const stylesheet = document.createElement('style');
@@ -18,14 +19,14 @@ document.head.appendChild(stylesheet);
 
 // Scene Rendering, Camera and Orbit Control
 const scene = new THREE.Scene();
-const renderer = new THREE.WebGLRenderer();
+const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 const ratio = window.innerWidth / window.innerHeight;
 const camera = new THREE.PerspectiveCamera(45, ratio, 0.1, 1000);
 camera.position.set(0, 10, 30);
-// eslint-disable-next-line no-unused-vars
-const control = new OrbitControls(camera);
+const orbitControl = new OrbitControls(camera);
+orbitControl.maxDistance = 120;
 
 // Basic Lighting
 const cameralight = new THREE.PointLight(new THREE.Color(1, 1, 1), 0.8);
@@ -41,6 +42,22 @@ scene.add(ambientLight);
 let numberOfTrees = 1;
 let colorOfLeaves = '#2dc89b';
 let islandRotationSpeed = 0.5;
+let isDayOrNight = 'day';
+
+// Scene Background
+const skyboxDay = createSkyboxDay();
+const skyboxNight = createSkyboxNight();
+scene.add(skyboxDay);
+
+function setDayAndNight(val) {
+    if (val === 'night') {
+        scene.add(skyboxNight);
+        scene.remove(skyboxDay);
+    } else if (val === 'day') {
+        scene.add(skyboxDay);
+        scene.remove(skyboxNight);
+    }
+}
 
 // Scene GUI. Should use variables from above
 const gui = new dat.GUI();
@@ -48,6 +65,7 @@ const params = {
     numberOfTrees: numberOfTrees,
     colorOfLeaves: colorOfLeaves,
     plainRotationSpeed: islandRotationSpeed,
+    isDayOrNight: isDayOrNight,
 };
 
 // Prefer onFinishChange() to reduce re-render calls. If change is immediate use onChange()
@@ -64,6 +82,15 @@ gui.addColor(params, 'colorOfLeaves').onChange(val => {
 });
 gui.open();
 
+const environmentControlUI = gui.addFolder('environmentControls');
+environmentControlUI
+    .add(params, 'isDayOrNight', ['day', 'night'])
+    .onFinishChange(val => {
+        setDayAndNight(val);
+        isDayOrNight = val;
+    });
+environmentControlUI.open();
+
 // Declare & Add Objects to Scene here. You can also attach objects to each other and only add the parent object to the scene
 const objLoader = new OBJLoader();
 const mtlLoader = new MTLLoader();
@@ -72,7 +99,6 @@ let islandObject = new THREE.Group();
 
 mtlLoader.load(islandMtlPath, materials => {
     materials.preload();
-
     objLoader.setMaterials(materials).load(islandObjPath, object => {
         islandObject = object;
         scene.add(islandObject);
