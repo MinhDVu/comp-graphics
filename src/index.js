@@ -5,11 +5,12 @@ import { MTLLoader } from 'three/examples/jsm/loaders/MTLLoader';
 const OrbitControls = require('three-orbit-controls')(THREE);
 
 // Import utility functions from utility.js
+import { createSkyboxNight, createSkyboxDay } from './skyboxHelper';
+import Ocean from './ocean';
 
 // 3D modules import
 import islandObjPath from './models/island.obj';
 import islandMtlPath from './models/island.mtl';
-import { createSkyboxNight, createSkyboxDay } from './skyboxHelper';
 
 // Reset default CSS
 const stylesheet = document.createElement('style');
@@ -27,6 +28,7 @@ const camera = new THREE.PerspectiveCamera(45, ratio, 0.1, 1000);
 camera.position.set(0, 10, 30);
 const orbitControl = new OrbitControls(camera);
 orbitControl.maxDistance = 120;
+orbitControl.maxPolarAngle = Math.PI / 2;
 
 // Basic Lighting
 const cameralight = new THREE.PointLight(new THREE.Color(1, 1, 1), 0.8);
@@ -38,67 +40,90 @@ scene.add(camera);
 const ambientLight = new THREE.AmbientLight(new THREE.Color(1, 1, 1), 0.55);
 scene.add(ambientLight);
 
-// Declare scene control variables here (ie: number of trees, color of leaves)
+// Declare scene control letiables here (ie: number of trees, color of leaves)
 let numberOfTrees = 1;
 let colorOfLeaves = '#2dc89b';
-let islandRotationSpeed = 0;
-let isDayOrNight = 'day';
-let oceanHeight = 0.14;
+let islandRotationSpeed = 1;
+let isDay = true;
+let oceanHeight = 0;
+let waveSpeed = 0.08;
+let waterColor = 0x68c3c0;
+let waterOpacity = 0.5;
+let waveIntensity = 0.25;
 
 // Scene Background
 const skyboxDay = createSkyboxDay();
 const skyboxNight = createSkyboxNight();
-scene.add(skyboxDay);
-
-function setDayAndNight(val) {
-    if (val === 'night') {
-        scene.add(skyboxNight);
-        scene.remove(skyboxDay);
-    } else if (val === 'day') {
-        scene.add(skyboxDay);
-        scene.remove(skyboxNight);
-    }
+if (isDay) {
+    scene.add(skyboxDay);
+} else {
+    scene.add(skyboxNight);
 }
 
-// Scene GUI. Should use variables from above
+// Ocean Control
+let ocean = new Ocean(waterColor, oceanHeight, waterOpacity);
+scene.add(ocean.mesh);
+
+// Scene GUI. Should use letiables from above
 const gui = new dat.GUI();
-const params = {
+const guiParams = {
     numberOfTrees: numberOfTrees,
     colorOfLeaves: colorOfLeaves,
-    plainRotationSpeed: islandRotationSpeed,
-    isDayOrNight: isDayOrNight,
+    islandRotationSpeed: islandRotationSpeed,
     oceanHeight: oceanHeight,
+    waveSpeed: waveSpeed,
+    waterColor: waterColor,
+    waterOpacity: waterOpacity,
+    waveIntensity: waveIntensity,
+    toggleDayNight: () => {
+        if (isDay) {
+            scene.add(skyboxNight);
+            scene.remove(skyboxDay);
+        } else {
+            scene.add(skyboxDay);
+            scene.remove(skyboxNight);
+        }
+        isDay = !isDay;
+    },
 };
 
 // Prefer onFinishChange() to reduce re-render calls. If change is immediate use onChange()
-gui.add(params, 'plainRotationSpeed', 0.5, 5).onFinishChange(val => {
+gui.add(guiParams, 'islandRotationSpeed', 0.5, 5).onFinishChange(val => {
     islandRotationSpeed = val;
 });
-gui.add(params, 'numberOfTrees', 1, 10).onFinishChange(val => {
+gui.add(guiParams, 'numberOfTrees', 0, 100, 1).onFinishChange(val => {
     // Set # of trees
     console.log(val);
 });
-gui.addColor(params, 'colorOfLeaves').onChange(val => {
+gui.addColor(guiParams, 'colorOfLeaves').onChange(val => {
     // Set color of leaves
     console.log(val);
 });
 gui.open();
 
-const environmentControlUI = gui.addFolder('environmentControls');
-environmentControlUI
-    .add(params, 'isDayOrNight', ['day', 'night'])
-    .onFinishChange(val => {
-        setDayAndNight(val);
-        isDayOrNight = val;
-    });
+const environmentControlUI = gui.addFolder('Environment Controls');
+environmentControlUI.add(guiParams, 'toggleDayNight');
 environmentControlUI.open();
 
 const oceanControlUI = gui.addFolder('Ocean Controls');
-oceanControlUI
-    .add(params, 'oceanHeight', -1, 1)
-    .onFinishChange(val => {
-        oceanHeight = val;
-    });
+oceanControlUI.add(guiParams, 'oceanHeight', -1, 1, 0.1).onFinishChange(val => {
+    oceanHeight = val;
+    ocean.mesh.position.y = oceanHeight;
+});
+oceanControlUI.add(guiParams, 'waveSpeed', 0.01, 0.3).onFinishChange(val => {
+    waveSpeed = val;
+});
+oceanControlUI.add(guiParams, 'waveIntensity', 0.1, 0.6).onFinishChange(val => {
+    waveIntensity = val;
+});
+oceanControlUI.add(guiParams, 'waterOpacity', 0.2, 1).onFinishChange(val => {
+    waterOpacity = val;
+    ocean.mesh.material.setValues({ opacity: waterOpacity });
+});
+oceanControlUI.addColor(guiParams, 'waterColor').onFinishChange(val => {
+    waterColor = val;
+    ocean.mesh.material.setValues({ color: waterColor });
+});
 oceanControlUI.open();
 
 // Declare & Add Objects to Scene here. You can also attach objects to each other and only add the parent object to the scene
@@ -114,92 +139,12 @@ mtlLoader.load(islandMtlPath, materials => {
         scene.add(islandObject);
     });
 });
-    //BEGINNING HEINS CODE
-//Building the ocean
-function Ocean(){
-    //ocean mesh
-    var oceanGeom = new THREE.PlaneGeometry(500, 500, 180, 180);
-    oceanGeom.applyMatrix(new THREE.Matrix4().makeRotationX(-Math.PI/2));
-
-    //prepare vertices for animation
-    oceanGeom.mergeVertices();
-    var l = oceanGeom.vertices.length;
-
-    //array to store ocean vertex data
-    this.waves = [];
-    for (var i = 0; i < l; i++){
-		var oV = oceanGeom.vertices[i];
-
-		//gives the vertex some info to create variation in the ocean
-		this.waves.push({y:oV.y,
-						x:oV.x,
-						z:oV.z,
-						//random angle
-						ang:Math.random()*Math.PI*2,
-						//random distance
-						amp:0.05 + Math.random()*0.2,
-						//random speed for vertexes
-						speed:0.004 + Math.random()*0.012
-					});
-	}
-
-    //ocean materials
-    var oceanMat = new THREE.MeshPhongMaterial({
-        color:0x68c3c0,
-        transparent:true,
-        opacity:0.9,
-        shading:THREE.FlatShading,
-    });
-
-    this.mesh = new THREE.Mesh(oceanGeom, oceanMat);
-
-    this.mesh.receiveShadow = true;
-
-    //function that animates the waves
-    Ocean.prototype.animWaves = function (){
-	
-        //gets vertices
-        var oceanVerts = this.mesh.geometry.vertices;
-        var len = oceanVerts.length;
-        
-        for (var i=0; i<len; i++){
-            var v = oceanVerts[i];
-            
-            //gets vertice data
-            var vertProps = this.waves[i];
-            
-            //updates vertex positions in a circular motion
-            v.x = vertProps.x + Math.cos(vertProps.ang)*vertProps.amp;
-            v.y = vertProps.y + Math.sin(vertProps.ang)*vertProps.amp;
-    
-            //increments angle
-            vertProps.ang += vertProps.speed;
-    
-        }
-
-    this.mesh.geometry.verticesNeedUpdate=true;
-
-    }
-}
-
-// Instantiating the ocean
-var ocean;
-
-function createOcean(){
-	ocean = new Ocean();
-    ocean.mesh.position.y = oceanHeight;
-	scene.add(ocean.mesh);
-}
-
-createOcean();
-    //ENDING HEINS CODE
 
 // Scene Animation (called 60 times/sec). This should call other functions that updates objects
 function animate() {
     requestAnimationFrame(animate);
     islandObject.rotateY(islandRotationSpeed / 100);
+    ocean.animateWaves(waveSpeed, waveIntensity);
     renderer.render(scene, camera);
-    ocean.animWaves();
-    ocean.mesh.position.y = oceanHeight;
 }
 animate();

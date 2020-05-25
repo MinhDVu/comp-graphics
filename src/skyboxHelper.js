@@ -21,7 +21,6 @@ import skyboxDaylfPath from './background/day-time/skyboxDay-lf.jpg';
 import skyboxDayrtPath from './background/day-time/skyboxDay-rt.jpg';
 import skyboxDayupPath from './background/day-time/skyboxDay-up.jpg';
 
-// This file should be used to initilize complex 3D objects. All functions must return a value and have export at the start of line
 const skyboxTextureLoader = new TextureLoader();
 const skyboxBoxGeometry = new BoxGeometry(1000, 1000, 1000);
 
