@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import * as dat from 'dat.gui';
+import Stats from 'stats.js';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader';
 import { MTLLoader } from 'three/examples/jsm/loaders/MTLLoader';
 const OrbitControls = require('three-orbit-controls')(THREE);
@@ -39,6 +40,11 @@ scene.add(camera);
 // Ambient Lighting
 const ambientLight = new THREE.AmbientLight(new THREE.Color(1, 1, 1), 0.55);
 scene.add(ambientLight);
+
+// FPS Counter
+const fpsCounter = new Stats();
+fpsCounter.showPanel(0);
+document.body.appendChild(fpsCounter.dom);
 
 // Declare scene control letiables here (ie: number of trees, color of leaves)
 let numberOfTrees = 1;
@@ -142,9 +148,11 @@ mtlLoader.load(islandMtlPath, materials => {
 
 // Scene Animation (called 60 times/sec). This should call other functions that updates objects
 function animate() {
-    requestAnimationFrame(animate);
+    fpsCounter.begin();
     islandObject.rotateY(islandRotationSpeed / 100);
     ocean.animateWaves(waveSpeed, waveIntensity);
     renderer.render(scene, camera);
+    fpsCounter.end();
+    requestAnimationFrame(animate);
 }
 animate();
