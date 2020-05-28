@@ -25,14 +25,17 @@ function winter()
     snowGeo = new THREE.Geometry();
     for (let i = 0; i < 12000; i++)
     {
+        //set the position for the snow
         snow = new THREE.Vector3(
             (Math.random() - 0.5) * 300,
             (Math.random() - 0.5) * 100,
             (Math.random() - 0.5) * 300
         );
+        //set the velocity
         snow.velocity = 0.3;
         snowGeo.vertices.push(snow);
     }
+    //add texture to the snow
     let snowTexture = new THREE.TextureLoader().load('textures/snow.png');
     let snowMaterial = new THREE.PointsMaterial({
         color: 0xffffff,
@@ -48,6 +51,7 @@ function winter()
     snowAnimation();
 }
 
+//animate the snow
 function snowAnimation()
 {
     snowGeo.vertices.forEach(p => {
@@ -55,6 +59,7 @@ function snowAnimation()
         p.y += (Math.random() - 0.75) * 0.1;
         p.z += (Math.random()) * 0.1;
 
+        //if the snow go to the max coordinate, it will restart the animation again from the specific coordinate
         if (p.x < -150) {
             p.x = 150;
         }
@@ -66,14 +71,9 @@ function snowAnimation()
         if (p.z < -150) {
             p.z = 150;
         }
-
-        if (p.z > 150) {
-            p.z = -150;
-        }
     });
     //update new position
     snowGeo.verticesNeedUpdate = true;
-    snowSystem.rotation.x += 0.002;
     renderer.render(scene, camera);
     requestAnimationFrame(snowAnimation);
 }
