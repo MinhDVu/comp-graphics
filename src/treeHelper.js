@@ -100,5 +100,7 @@ export function addTree(scene, treeArray) {
 
 export function removeTree(scene, treeArray) {
     scene.remove(treeArray[treeArray.length - 1]);
+    treePositionsX.pop();
+    treePositionsY.pop();
     treeArray.pop();
 }
