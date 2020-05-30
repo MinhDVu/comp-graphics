@@ -3,7 +3,6 @@ import * as dat from 'dat.gui';
 import Stats from 'stats.js';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader';
 import { MTLLoader } from 'three/examples/jsm/loaders/MTLLoader';
-import { PLYLoader } from 'three/examples/jsm/loaders/PLYLoader';
 const OrbitControls = require('three-orbit-controls')(THREE);
 
 // Import utility functions from utility.js
@@ -77,7 +76,6 @@ scene.add(ocean.mesh);
 // Declare & Add Objects to Scene here. You can also attach objects to each other and only add the parent object to the scene
 const objLoader = new OBJLoader();
 const mtlLoader = new MTLLoader();
-const PLYloader = new PLYLoader();
 
 let islandObject = new THREE.Group();
 
@@ -111,13 +109,13 @@ const guiParams = {
         isDay = !isDay;
     },
     AddTree: () => {
-        addTree(islandObject, treeArray, PLYloader);
+        addTree(islandObject, treeArray);
     },
     RemoveTree: () => {
         if (treeArray.length > 0) {
-            removeTree(scene, treeArray)
+            removeTree(scene, treeArray);
         }
-    }
+    },
 };
 
 // Prefer onFinishChange() to reduce re-render calls. If change is immediate use onChange()
