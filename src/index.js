@@ -28,9 +28,9 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 const ratio = window.innerWidth / window.innerHeight;
 const camera = new THREE.PerspectiveCamera(45, ratio, 0.1, 15000);
-camera.position.set(0, 10, 30);
+camera.position.set(500, 200, 30);
 const orbitControl = new OrbitControls(camera);
-// orbitControl.maxDistance = 500;
+orbitControl.maxDistance = 1000;
 orbitControl.maxPolarAngle = Math.PI / 2;
 
 // Basic Lighting
@@ -72,8 +72,8 @@ let ocean = new Ocean(waterColor, oceanHeight, waterOpacity);
 scene.add(ocean.mesh);
 
 // Weather Control
-let rain = new Rain(10000);
-let snow = new Snow(15000);
+let rain = new Rain(5000);
+let snow = new Snow(5000);
 
 // Scene GUI. Should use letiables from above
 const gui = new dat.GUI();
@@ -126,10 +126,10 @@ oceanControlUI.add(guiParams, 'oceanHeight', -1, 1, 0.1).onFinishChange(val => {
     ocean.mesh.position.y = oceanHeight;
 });
 oceanControlUI
-    .add(guiParams, 'waveSpeed', 0.01, 0.3)
+    .add(guiParams, 'waveSpeed', 0.01, 0.2)
     .onFinishChange(val => (waveSpeed = val));
 oceanControlUI
-    .add(guiParams, 'waveIntensity', 0.1, 1)
+    .add(guiParams, 'waveIntensity', 0.1, 4.5)
     .onFinishChange(val => (waveIntensity = val));
 oceanControlUI.add(guiParams, 'waterOpacity', 0.2, 1).onFinishChange(val => {
     waterOpacity = val;
@@ -151,6 +151,7 @@ mtlLoader.load(islandMtlPath, materials => {
     materials.preload();
     objLoader.setMaterials(materials).load(islandObjPath, object => {
         islandObject = object;
+        islandObject.scale.x = islandObject.scale.y = islandObject.scale.z = 10;
         scene.add(islandObject);
     });
 });

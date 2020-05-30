@@ -15,9 +15,9 @@ export default class Rain {
         let rainDrop;
         for (let i = 0; i < rainDropCount; i++) {
             rainDrop = new Vector3(
-                (Math.random() - 0.5) * 200,
-                (Math.random() - 0.5) * 100,
-                (Math.random() - 0.5) * 200
+                (Math.random() - 0.5) * 1600,
+                Math.random() * 2000,
+                (Math.random() - 0.5) * 1600
             );
             rainDrop.velocity = 0.5;
             rainGeometry.vertices.push(rainDrop);
@@ -26,7 +26,7 @@ export default class Rain {
         let rainDropTexture = new TextureLoader().load(rainPath);
         let rainMaterial = new PointsMaterial({
             color: 0xffffff,
-            size: 0.7,
+            size: 15,
             map: rainDropTexture,
             transparent: true,
             blending: AdditiveBlending,
@@ -41,12 +41,12 @@ export default class Rain {
             rainDrop.velocity -= 0.1 + Math.random() * 0.1;
             rainDrop.y += rainDrop.velocity;
             if (rainDrop.y < -50) {
-                rainDrop.y = 50;
+                rainDrop.y = 1000;
                 rainDrop.velocity = 0;
             }
         }
 
         this.rainSystem.geometry.verticesNeedUpdate = true;
-        this.rainSystem.rotation.y += 0.02;
+        this.rainSystem.rotation.y += 0.0075;
     }
 }
