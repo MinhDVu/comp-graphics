@@ -113,7 +113,7 @@ const guiParams = {
     },
     RemoveTree: () => {
         if (treeArray.length > 0) {
-            removeTree(scene, treeArray);
+            removeTree(islandObject, treeArray);
         }
     },
 };

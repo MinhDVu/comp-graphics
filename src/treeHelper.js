@@ -92,7 +92,7 @@ export function addTree(scene, treeArray) {
     } else {
         ++addAttempt;
         if (addAttempt < 200) {
-            addTree();
+            addTree(scene, treeArray);
         }
     }
     addAttempt = 0;
