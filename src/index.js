@@ -164,7 +164,7 @@ mtlLoader.load(islandMtlPath, materials => {
     });
 });
 
-//scenery
+//scenery (hide this code if you want to see rain effect)
 function winter()
 {
     snowGeo = new THREE.Geometry();
@@ -229,7 +229,7 @@ function rainy()
 }
 */
 
-//animate the snow
+//animate the snow (hide this code if you want to see rain effect)
 function snowAnimation()
 {
     snowGeo.vertices.forEach(p => {
@@ -259,7 +259,7 @@ function snowAnimation()
     requestAnimationFrame(snowAnimation);
 }
 
-/*
+/* 
 function rainAnimation()
 {
     //animate rain
