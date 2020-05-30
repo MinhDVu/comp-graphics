@@ -18,6 +18,7 @@ import snowPath from './models/snow.png';
 
 //import rain texture
 import rainPath from './models/rain.png';
+import { CubeCamera } from 'three';
 
 // Reset default CSS
 const stylesheet = document.createElement('style');
