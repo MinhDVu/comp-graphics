@@ -164,6 +164,7 @@ mtlLoader.load(islandMtlPath, materials => {
     });
 });
 
+/*
 //scenery (hide this code if you want to see rain effect)
 function winter()
 {
@@ -195,8 +196,9 @@ function winter()
     scene.add(snowSystem);
     snowAnimation();
 }
+*/
 
-/*
+
 function rainy()
 {
     //create rain
@@ -212,7 +214,7 @@ function rainy()
         rainGeo.vertices.push(rainDrop);
     }
 
-    //add texture to the snow
+    //add texture to the rain
     let rainTexture = new THREE.TextureLoader().load(rainPath);
     let rainMaterial = new THREE.PointsMaterial({
         color: 0xffffff,
@@ -227,8 +229,8 @@ function rainy()
     scene.add(rainSystem);
     rainAnimation();
 }
-*/
 
+/*
 //animate the snow (hide this code if you want to see rain effect)
 function snowAnimation()
 {
@@ -258,8 +260,8 @@ function snowAnimation()
     renderer.render(scene, camera);
     requestAnimationFrame(snowAnimation);
 }
+*/
 
-/* 
 function rainAnimation()
 {
     //animate rain
@@ -276,7 +278,6 @@ function rainAnimation()
     renderer.render(scene, camera);
     requestAnimationFrame(rainAnimation);
 }
-*/
 
 // Scene Animation (called 60 times/sec). This should call other functions that updates objects
 function animate() {
@@ -289,5 +290,5 @@ function animate() {
 }
 
 animate();
-winter();
-//rainy();
+//winter();
+rainy();
