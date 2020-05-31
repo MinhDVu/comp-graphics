@@ -22,7 +22,7 @@ import skyboxDayrtPath from './background/day-time/skyboxDay-rt.jpg';
 import skyboxDayupPath from './background/day-time/skyboxDay-up.jpg';
 
 const skyboxTextureLoader = new TextureLoader();
-const skyboxBoxGeometry = new BoxGeometry(1000, 1000, 1000);
+const skyboxBoxGeometry = new BoxGeometry(10000, 10000, 10000);
 
 export function createSkyboxNight() {
     let skyboxNightMaterials = [];
@@ -40,8 +40,8 @@ export function createSkyboxNight() {
     skyboxNightMaterials.push(new MeshBasicMaterial({ map: skyboxNightrt }));
     skyboxNightMaterials.push(new MeshBasicMaterial({ map: skyboxNightlf }));
 
-    for (let material of skyboxNightMaterials) {
-        material.side = BackSide;
+    for (let i = 0; i < 6; i++) {
+        skyboxNightMaterials[i].side = BackSide;
     }
 
     return new Mesh(skyboxBoxGeometry, skyboxNightMaterials);
@@ -63,8 +63,8 @@ export function createSkyboxDay() {
     skyboxDayMaterials.push(new MeshBasicMaterial({ map: skyboxDayrt }));
     skyboxDayMaterials.push(new MeshBasicMaterial({ map: skyboxDaylf }));
 
-    for (let material of skyboxDayMaterials) {
-        material.side = BackSide;
+    for (let i = 0; i < 6; i++) {
+        skyboxDayMaterials[i].side = BackSide;
     }
 
     return new Mesh(skyboxBoxGeometry, skyboxDayMaterials);

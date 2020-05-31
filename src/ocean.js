@@ -19,7 +19,7 @@ export default class Ocean extends Object3D {
     constructor(waterColor, oceanHeight, waterOpacity) {
         super();
         //ocean mesh
-        let oceanGeometry = new PlaneGeometry(400, 400, 100, 100);
+        let oceanGeometry = new PlaneGeometry(2000, 2000, 150, 150);
         oceanGeometry.applyMatrix4(new Matrix4().makeRotationX(-Math.PI / 2));
 
         //prepare vertices for animation
