@@ -7,17 +7,27 @@ var treePositionsX = [];
 var treePositionsY = [];
 var addAttempt = 0;
 var mesh = null;
+var totalDistance;
+var percentage;
 
 // generates a random number between 0 and 'limit'
 function randomGenerate() {
-    var limit = 10;
+    var limit = 9;
     var number = Math.floor(Math.random() * limit);
     return number;
 }
 
+function generateZ(xValue, yValue) {
+    xValue = Math.abs(xValue);
+    yValue = Math.abs(yValue);
+    totalDistance = Math.sqrt((xValue * xValue) + (yValue * yValue));
+    percentage = totalDistance/12.73;
+    return 5 - (2 * percentage);
+}
+
 // returns a positive or negative value based on whether a randomly generated number is odd or even
 function positiveOrNegative() {
-    var number = Math.floor(Math.random() * 10) % 2;
+    var number = Math.floor(Math.random() * 9) % 2;
     if (number == 0) {
         return -1;
     } else {
@@ -66,16 +76,17 @@ export function addTree(scene, treeArray) {
             let tra = new Matrix4();
             let rot = new Matrix4();
             let combined = new Matrix4();
+            let zPosition = generateZ(treePositionX, treePositionY);
 
             sca.makeScale(
                 2.5 / size.length(),
                 2.5 / size.length(),
-                3 / size.length()
+                3.5 / size.length()
             );
             tra.makeTranslation(
                 -center.x + treePositionX,
                 -center.y + treePositionY,
-                -center.z + 5
+                -center.z + zPosition
             );
             rot.makeRotationX(-Math.PI / 2);
             combined.multiply(rot);
