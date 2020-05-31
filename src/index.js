@@ -8,6 +8,8 @@ const OrbitControls = require('three-orbit-controls')(THREE);
 // Import utility functions
 import { createSkyboxNight, createSkyboxDay } from './skyboxHelper';
 import Ocean from './ocean';
+import { addTree } from './treeHelper';
+import { removeTree } from './treeHelper';
 import Rain from './rain';
 import Snow from './winter';
 
@@ -56,6 +58,7 @@ let waveSpeed = 0.08;
 let waterColor = 0x68c3c0;
 let waterOpacity = 0.5;
 let waveIntensity = 0.25;
+let treeArray = [];
 let weatherMode = 'sunny';
 
 // Scene Background
@@ -71,6 +74,20 @@ if (isDay) {
 let ocean = new Ocean(waterColor, oceanHeight, waterOpacity);
 scene.add(ocean.mesh);
 
+// Declare & Add Objects to Scene here. You can also attach objects to each other and only add the parent object to the scene
+const objLoader = new OBJLoader();
+const mtlLoader = new MTLLoader();
+
+let islandObject = new THREE.Group();
+
+mtlLoader.load(islandMtlPath, materials => {
+    materials.preload();
+    objLoader.setMaterials(materials).load(islandObjPath, object => {
+        islandObject = object;
+        islandObject.scale.x = islandObject.scale.y = islandObject.scale.z = 10;
+        scene.add(islandObject);
+    });
+});
 // Weather Control
 let rain = new Rain(5000);
 let snow = new Snow(5000);
@@ -94,6 +111,14 @@ const guiParams = {
         }
         isDay = !isDay;
     },
+    AddTree: () => {
+        addTree(islandObject, treeArray);
+    },
+    RemoveTree: () => {
+        if (treeArray.length > 0) {
+            removeTree(islandObject, treeArray);
+        }
+    },
     cycleWeather: () => {
         if (weatherMode === 'sunny') {
             scene.add(rain.rainSystem);
@@ -114,6 +139,11 @@ gui.add(guiParams, 'islandRotationSpeed', 0.5, 5).onFinishChange(val => {
     islandRotationSpeed = val;
 });
 gui.open();
+
+const treeControlUI = gui.addFolder('Tree Controls');
+treeControlUI.add(guiParams, 'AddTree');
+treeControlUI.add(guiParams, 'RemoveTree');
+treeControlUI.open();
 
 const environmentControlUI = gui.addFolder('Environment Controls');
 environmentControlUI.add(guiParams, 'toggleDayNight');
@@ -140,21 +170,6 @@ oceanControlUI.addColor(guiParams, 'waterColor').onFinishChange(val => {
     ocean.mesh.material.setValues({ color: waterColor });
 });
 oceanControlUI.open();
-
-// Declare & Add Objects to Scene here. You can also attach objects to each other and only add the parent object to the scene
-const objLoader = new OBJLoader();
-const mtlLoader = new MTLLoader();
-
-let islandObject = new THREE.Group();
-
-mtlLoader.load(islandMtlPath, materials => {
-    materials.preload();
-    objLoader.setMaterials(materials).load(islandObjPath, object => {
-        islandObject = object;
-        islandObject.scale.x = islandObject.scale.y = islandObject.scale.z = 10;
-        scene.add(islandObject);
-    });
-});
 
 // Scene Animation (called 60 times/sec). This should call other functions that updates objects
 function animate() {
