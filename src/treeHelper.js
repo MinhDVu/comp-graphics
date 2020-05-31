@@ -104,3 +104,12 @@ export function removeTree(scene, treeArray) {
     treePositionsY.pop();
     treeArray.pop();
 }
+
+export function removeAllTrees(scene, treeArray) {
+    for (var numberOfTrees = treeArray.length; numberOfTrees > 0; numberOfTrees--) {
+        scene.remove(treeArray[treeArray.length -1]);
+        treePositionsX.pop();
+        treePositionsY.pop();
+        treeArray.pop();
+    }
+}

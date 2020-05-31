@@ -10,6 +10,7 @@ import { createSkyboxNight, createSkyboxDay } from './skyboxHelper';
 import Ocean from './ocean';
 import { addTree } from './treeHelper';
 import { removeTree } from './treeHelper';
+import { removeAllTrees } from './treeHelper';
 import Rain from './rain';
 import Snow from './winter';
 
@@ -119,6 +120,9 @@ const guiParams = {
             removeTree(islandObject, treeArray);
         }
     },
+    RemoveAllTrees: () => {
+        removeAllTrees(islandObject, treeArray);
+    },
     cycleWeather: () => {
         if (weatherMode === 'sunny') {
             scene.add(rain.rainSystem);
@@ -143,6 +147,7 @@ gui.open();
 const treeControlUI = gui.addFolder('Tree Controls');
 treeControlUI.add(guiParams, 'AddTree');
 treeControlUI.add(guiParams, 'RemoveTree');
+treeControlUI.add(guiParams, 'RemoveAllTrees');
 treeControlUI.open();
 
 const environmentControlUI = gui.addFolder('Environment Controls');
