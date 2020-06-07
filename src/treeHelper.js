@@ -11,7 +11,7 @@ var percentage;
 
 // generates a random number between 0 and 'limit'
 function randomGenerate() {
-    var limit = 10;
+    var limit = 9;
     var number = Math.floor(Math.random() * limit);
     return number;
 }
@@ -32,7 +32,7 @@ function generateYRot() {
 
 // returns a positive or negative value based on whether a randomly generated number is odd or even
 function positiveOrNegative() {
-    var number = Math.floor(Math.random() * 10) % 2;
+    var number = Math.floor(Math.random() * 9) % 2;
     if (number == 0) {
         return -1;
     } else {
