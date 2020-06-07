@@ -53,6 +53,9 @@ const moonLightHelper = new THREE.HemisphereLightHelper(
 );
 scene.add(moonLightHelper);
 
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.05);
+scene.add(ambientLight);
+
 // FPS Counter
 const fpsCounter = new Stats();
 fpsCounter.showPanel(0);
@@ -158,6 +161,8 @@ const guiParams = {
         }
     },
     time: 0.0005,
+    sunLightColor: sunLight.color.getHex(),
+    moonLightColor: moonLight.color.getHex(),
 };
 
 // Lighting Control
@@ -200,16 +205,30 @@ treeControlUI.open();
 const environmentControlUI = gui.addFolder('Environment Controls');
 environmentControlUI.add(guiParams, 'toggleDayNight');
 environmentControlUI.add(guiParams, 'cycleWeather');
-environmentControlUI.add(guiParams, 'time', 0.0001, 0.005).onFinishChange(val => {
-    guiParams.time = val;
-});
+environmentControlUI
+    .add(guiParams, 'time', 0.00005, 0.002)
+    .onFinishChange(val => {
+        guiParams.time = val;
+    });
+environmentControlUI
+    .addColor(guiParams, 'sunLightColor')
+    .onFinishChange(val => {
+        sunLight.color = new THREE.Color(val);
+    });
+environmentControlUI
+    .addColor(guiParams, 'moonLightColor')
+    .onFinishChange(val => {
+        moonLight.color = new THREE.Color(val);
+    });
 environmentControlUI.open();
 
 const oceanControlUI = gui.addFolder('Ocean Controls');
-oceanControlUI.add(guiParams, 'oceanHeight', -1, 1, 0.1).onFinishChange(val => {
-    oceanHeight = val;
-    ocean.mesh.position.y = oceanHeight;
-});
+oceanControlUI
+    .add(guiParams, 'oceanHeight', -1, 10, 0.1)
+    .onFinishChange(val => {
+        oceanHeight = val;
+        ocean.mesh.position.y = oceanHeight;
+    });
 oceanControlUI
     .add(guiParams, 'waveSpeed', 0.01, 0.2)
     .onFinishChange(val => (waveSpeed = val));
