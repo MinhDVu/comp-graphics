@@ -32,34 +32,26 @@ document.body.appendChild(renderer.domElement);
 const ratio = window.innerWidth / window.innerHeight;
 const camera = new THREE.PerspectiveCamera(45, ratio, 0.1, 15000);
 camera.position.set(500, 200, 30);
+scene.add(camera);
 const orbitControl = new OrbitControls(camera);
 // orbitControl.maxDistance = 1000;
 // orbitControl.maxPolarAngle = Math.PI / 2;
 
-// Basic Lighting
-let directionalLight = new THREE.DirectionalLight(0xf0be62, 0.8);
-// directionalLight.position.set(200, 200, 0);
-scene.add(directionalLight);
-directionalLight.castShadow = true;
-scene.add(camera);
+// Lighting Models
+// TODO: remove light helpers
+const sunLight = new THREE.DirectionalLight(0xf0be62, 0.8);
+sunLight.castShadow = true;
 
-const pointLightHelper = new THREE.DirectionalLightHelper(
-    directionalLight,
+const sunLightHelper = new THREE.DirectionalLightHelper(sunLight, 10, 0x00ff00);
+
+const moonLight = new THREE.HemisphereLight(0x6f8686, 0.05);
+scene.add(moonLight);
+const moonLightHelper = new THREE.HemisphereLightHelper(
+    moonLight,
     10,
     0x00ff00
 );
-scene.add(pointLightHelper);
-
-// Ambient Lighting
-const hemisLight = new THREE.HemisphereLight(0xb8e3e3, 0.1);
-// hemisLight.position.set(0, 200, 200);
-scene.add(hemisLight);
-const hemisLightHelper = new THREE.HemisphereLightHelper(
-    hemisLight,
-    10,
-    0x00ff00
-);
-scene.add(hemisLightHelper);
+scene.add(moonLightHelper);
 
 // FPS Counter
 const fpsCounter = new Stats();
@@ -68,15 +60,16 @@ document.body.appendChild(fpsCounter.dom);
 
 // Declare scene control variables here (ie: number of trees, color of leaves)
 let islandRotationSpeed = 1;
-let isDay = true;
+let isDay = false;
 let oceanHeight = 0;
-let waveSpeed = 0.08;
+let waveSpeed = 0.02;
 let waterColor = 0x68c3c0;
 let waterOpacity = 0.7;
-let waveIntensity = 0.8;
+let waveIntensity = 1.8;
 let treeArray = [];
 let weatherMode = 'sunny';
-let azimuth = 0;
+let lightingAngle = 0;
+let lightCycleTracker = 0;
 
 // Scene Background
 const skyboxDay = createSkyboxDay();
@@ -121,12 +114,23 @@ const guiParams = {
     waveIntensity: waveIntensity,
     toggleDayNight: () => {
         if (isDay) {
+            lightingAngle = 1;
             scene.add(skyboxNight);
+            scene.add(moonLight);
+            scene.add(moonLightHelper);
             scene.remove(skyboxDay);
+            scene.remove(sunLight);
+            scene.remove(sunLightHelper);
         } else {
+            lightingAngle = 0.5;
             scene.add(skyboxDay);
+            scene.add(sunLight);
+            scene.add(sunLightHelper);
             scene.remove(skyboxNight);
+            scene.remove(moonLight);
+            scene.remove(moonLightHelper);
         }
+        lightCycleTracker = 0;
         isDay = !isDay;
     },
     AddTree: () => {
@@ -153,25 +157,32 @@ const guiParams = {
             weatherMode = 'sunny';
         }
     },
+    time: 0.0005,
 };
 
 // Lighting Control
 function animateLighting() {
-    azimuth += 0.01 / 10;
-    pointLightHelper.update();
-    hemisLightHelper.update();
-    if (azimuth >= 1) {
-        azimuth = 0;
+    lightingAngle += guiParams.time;
+    lightCycleTracker += guiParams.time;
+
+    sunLightHelper.update();
+    moonLightHelper.update();
+    if (lightingAngle >= 1) {
+        lightingAngle = 0;
+    }
+    if (lightCycleTracker >= 0.5) {
+        guiParams.toggleDayNight();
+        lightCycleTracker = 0;
     }
 
-    var phi = 2 * Math.PI * (azimuth - 0.5);
-    directionalLight.position.x = 400 * Math.cos(phi);
-    directionalLight.position.y = 400 * Math.sin(phi) * Math.sin(0.5);
-    directionalLight.position.z = 400 * Math.sin(phi) * Math.sin(0.5);
+    var phi = 2 * Math.PI * (lightingAngle - 0.5);
+    sunLight.position.x = 400 * Math.cos(phi);
+    sunLight.position.y = 400 * Math.sin(phi) * Math.sin(0.5);
+    sunLight.position.z = 400 * Math.sin(phi) * Math.sin(0.5);
 
-    hemisLight.position.x = -directionalLight.position.x;
-    hemisLight.position.y = -directionalLight.position.y;
-    hemisLight.position.z = -directionalLight.position.z;
+    moonLight.position.x = -sunLight.position.x;
+    moonLight.position.y = -sunLight.position.y;
+    moonLight.position.z = -sunLight.position.z;
 }
 
 // Prefer onFinishChange() to reduce re-render calls. If change is immediate use onChange()
@@ -189,6 +200,9 @@ treeControlUI.open();
 const environmentControlUI = gui.addFolder('Environment Controls');
 environmentControlUI.add(guiParams, 'toggleDayNight');
 environmentControlUI.add(guiParams, 'cycleWeather');
+environmentControlUI.add(guiParams, 'time', 0.0001, 0.005).onFinishChange(val => {
+    guiParams.time = val;
+});
 environmentControlUI.open();
 
 const oceanControlUI = gui.addFolder('Ocean Controls');
@@ -215,7 +229,7 @@ oceanControlUI.open();
 // Scene Animation (called 60 times/sec). This should call other functions that updates objects
 function animate() {
     fpsCounter.begin();
-    // islandObject.rotateY(islandRotationSpeed / 100);
+    islandObject.rotateY(islandRotationSpeed / 100);
     ocean.animateWaves(waveSpeed, waveIntensity);
     if (weatherMode === 'rainy') {
         rain.animateRainDrop();
