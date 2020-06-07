@@ -33,18 +33,33 @@ const ratio = window.innerWidth / window.innerHeight;
 const camera = new THREE.PerspectiveCamera(45, ratio, 0.1, 15000);
 camera.position.set(500, 200, 30);
 const orbitControl = new OrbitControls(camera);
-orbitControl.maxDistance = 1000;
-orbitControl.maxPolarAngle = Math.PI / 2;
+// orbitControl.maxDistance = 1000;
+// orbitControl.maxPolarAngle = Math.PI / 2;
 
 // Basic Lighting
-const cameralight = new THREE.PointLight(new THREE.Color(1, 1, 1), 0.8);
-cameralight.castShadow = true;
-camera.add(cameralight);
+let directionalLight = new THREE.DirectionalLight(0xf0be62, 0.8);
+// directionalLight.position.set(200, 200, 0);
+scene.add(directionalLight);
+directionalLight.castShadow = true;
 scene.add(camera);
 
+const pointLightHelper = new THREE.DirectionalLightHelper(
+    directionalLight,
+    10,
+    0x00ff00
+);
+scene.add(pointLightHelper);
+
 // Ambient Lighting
-const ambientLight = new THREE.AmbientLight(new THREE.Color(1, 1, 1), 0.55);
-scene.add(ambientLight);
+const hemisLight = new THREE.HemisphereLight(0xb8e3e3, 0.1);
+// hemisLight.position.set(0, 200, 200);
+scene.add(hemisLight);
+const hemisLightHelper = new THREE.HemisphereLightHelper(
+    hemisLight,
+    10,
+    0x00ff00
+);
+scene.add(hemisLightHelper);
 
 // FPS Counter
 const fpsCounter = new Stats();
@@ -57,10 +72,11 @@ let isDay = true;
 let oceanHeight = 0;
 let waveSpeed = 0.08;
 let waterColor = 0x68c3c0;
-let waterOpacity = 0.5;
-let waveIntensity = 0.25;
+let waterOpacity = 0.7;
+let waveIntensity = 0.8;
 let treeArray = [];
 let weatherMode = 'sunny';
+let azimuth = 0;
 
 // Scene Background
 const skyboxDay = createSkyboxDay();
@@ -89,6 +105,7 @@ mtlLoader.load(islandMtlPath, materials => {
         scene.add(islandObject);
     });
 });
+
 // Weather Control
 let rain = new Rain(5000);
 let snow = new Snow(5000);
@@ -138,8 +155,27 @@ const guiParams = {
     },
 };
 
+// Lighting Control
+function animateLighting() {
+    azimuth += 0.01 / 10;
+    pointLightHelper.update();
+    hemisLightHelper.update();
+    if (azimuth >= 1) {
+        azimuth = 0;
+    }
+
+    var phi = 2 * Math.PI * (azimuth - 0.5);
+    directionalLight.position.x = 400 * Math.cos(phi);
+    directionalLight.position.y = 400 * Math.sin(phi) * Math.sin(0.5);
+    directionalLight.position.z = 400 * Math.sin(phi) * Math.sin(0.5);
+
+    hemisLight.position.x = -directionalLight.position.x;
+    hemisLight.position.y = -directionalLight.position.y;
+    hemisLight.position.z = -directionalLight.position.z;
+}
+
 // Prefer onFinishChange() to reduce re-render calls. If change is immediate use onChange()
-gui.add(guiParams, 'islandRotationSpeed', 0.5, 5).onFinishChange(val => {
+gui.add(guiParams, 'islandRotationSpeed', 0, 5).onFinishChange(val => {
     islandRotationSpeed = val;
 });
 gui.open();
@@ -179,13 +215,14 @@ oceanControlUI.open();
 // Scene Animation (called 60 times/sec). This should call other functions that updates objects
 function animate() {
     fpsCounter.begin();
-    islandObject.rotateY(islandRotationSpeed / 100);
+    // islandObject.rotateY(islandRotationSpeed / 100);
     ocean.animateWaves(waveSpeed, waveIntensity);
     if (weatherMode === 'rainy') {
         rain.animateRainDrop();
     } else if (weatherMode === 'snowy') {
         snow.animateSnowFlakes();
     }
+    animateLighting();
     renderer.render(scene, camera);
     fpsCounter.end();
     requestAnimationFrame(animate);
