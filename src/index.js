@@ -103,8 +103,8 @@ mtlLoader.load(islandMtlPath, materials => {
 });
 
 // Weather Control
-let rain = new Rain(5000);
-let snow = new Snow(5000);
+let rain = new Rain(15000);
+let snow = new Snow(20000);
 
 // Scene GUI. Should use letiables from above
 const gui = new dat.GUI();
@@ -137,7 +137,7 @@ const guiParams = {
         isDay = !isDay;
     },
     AddTree: () => {
-        addTree(islandObject, treeArray);
+        addTree(islandObject, treeArray, objLoader, mtlLoader);
     },
     RemoveTree: () => {
         if (treeArray.length > 0) {
