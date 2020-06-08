@@ -89,9 +89,10 @@ mtlLoader.load(islandMtlPath, materials => {
         scene.add(islandObject);
     });
 });
+
 // Weather Control
-let rain = new Rain(5000);
-let snow = new Snow(5000);
+let rain = new Rain(15000);
+let snow = new Snow(20000);
 
 // Scene GUI. Should use letiables from above
 const gui = new dat.GUI();
@@ -135,7 +136,7 @@ const guiParams = {
             scene.remove(snow.snowSystem);
             weatherMode = 'sunny';
         }
-    },
+    }
 };
 
 // Prefer onFinishChange() to reduce re-render calls. If change is immediate use onChange()
