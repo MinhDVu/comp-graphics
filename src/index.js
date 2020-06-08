@@ -114,7 +114,7 @@ const guiParams = {
         isDay = !isDay;
     },
     AddTree: () => {
-        addTree(islandObject, treeArray);
+        addTree(islandObject, treeArray, objLoader, mtlLoader);
     },
     RemoveTree: () => {
         if (treeArray.length > 0) {
