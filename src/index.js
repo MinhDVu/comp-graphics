@@ -34,12 +34,12 @@ const camera = new THREE.PerspectiveCamera(45, ratio, 0.1, 15000);
 camera.position.set(500, 200, 30);
 scene.add(camera);
 const orbitControl = new OrbitControls(camera);
-// orbitControl.maxDistance = 1000;
-// orbitControl.maxPolarAngle = Math.PI / 2;
+orbitControl.maxDistance = 1000;
+orbitControl.maxPolarAngle = Math.PI / 2;
 
 // Lighting Models
 // TODO: remove light helpers
-const sunLight = new THREE.DirectionalLight(0xf0be62, 0.8);
+const sunLight = new THREE.DirectionalLight(0xf0be62, 0.9);
 sunLight.castShadow = true;
 
 const sunLightHelper = new THREE.DirectionalLightHelper(sunLight, 10, 0x00ff00);
@@ -53,7 +53,7 @@ const moonLightHelper = new THREE.HemisphereLightHelper(
 );
 scene.add(moonLightHelper);
 
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.05);
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.1);
 scene.add(ambientLight);
 
 // FPS Counter
@@ -97,6 +97,8 @@ mtlLoader.load(islandMtlPath, materials => {
     materials.preload();
     objLoader.setMaterials(materials).load(islandObjPath, object => {
         islandObject = object;
+        islandObject.receiveShadow = true;
+        islandObject.castShadow = true;
         islandObject.scale.x = islandObject.scale.y = islandObject.scale.z = 10;
         scene.add(islandObject);
     });

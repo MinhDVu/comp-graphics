@@ -74,6 +74,8 @@ export function addTree(scene, treeArray, objLoader, mtlLoader) {
                 treeObject.rotateY(Math.PI * yRotation);
                 treeObject.scale.x = treeObject.scale.z = 0.4;
                 treeObject.scale.y = 0.5;
+                treeObject.receiveShadow = true;
+                treeObject.castShadow = true;
                 treeObject.translateX(treePositionX * 0.35);
                 treeObject.translateZ(treePositionZ * 0.35);
                 treeObject.translateY(treePositionY);
