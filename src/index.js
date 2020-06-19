@@ -17,6 +17,7 @@ import Snow from './winter';
 // 3D modules import
 import islandObjPath from './models/island.obj';
 import islandMtlPath from './models/island.mtl';
+import { buildRadiantSphere } from './lightSourceHelper';
 
 // Reset default CSS
 const stylesheet = document.createElement('style');
@@ -38,20 +39,15 @@ orbitControl.maxDistance = 1000;
 orbitControl.maxPolarAngle = Math.PI / 2;
 
 // Lighting Models
-// TODO: remove light helpers
 const sunLight = new THREE.DirectionalLight(0xf0be62, 0.9);
 sunLight.castShadow = true;
-
-const sunLightHelper = new THREE.DirectionalLightHelper(sunLight, 10, 0x00ff00);
+const sunLightSphere = buildRadiantSphere(50, 0xf0be62, true);
+sunLight.attach(sunLightSphere);
 
 const moonLight = new THREE.HemisphereLight(0x6f8686, 0.05);
+const moonLightShpere = buildRadiantSphere(20, 0x6f8686, false);
+moonLight.attach(moonLightShpere);
 scene.add(moonLight);
-const moonLightHelper = new THREE.HemisphereLightHelper(
-    moonLight,
-    10,
-    0x00ff00
-);
-scene.add(moonLightHelper);
 
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.1);
 scene.add(ambientLight);
@@ -62,13 +58,7 @@ fpsCounter.showPanel(0);
 document.body.appendChild(fpsCounter.dom);
 
 // Declare scene control variables here (ie: number of trees, color of leaves)
-let islandRotationSpeed = 1;
 let isDay = false;
-let oceanHeight = 0;
-let waveSpeed = 0.02;
-let waterColor = 0x68c3c0;
-let waterOpacity = 0.7;
-let waveIntensity = 1.8;
 let treeArray = [];
 let weatherMode = 'sunny';
 let lightingAngle = 0;
@@ -84,7 +74,7 @@ if (isDay) {
 }
 
 // Ocean Control
-let ocean = new Ocean(waterColor, oceanHeight, waterOpacity);
+let ocean = new Ocean(0x68c3c0, 0, 0.7);
 scene.add(ocean.mesh);
 
 // Declare & Add Objects to Scene here. You can also attach objects to each other and only add the parent object to the scene
@@ -111,29 +101,25 @@ let snow = new Snow(20000);
 // Scene GUI. Should use letiables from above
 const gui = new dat.GUI();
 const guiParams = {
-    islandRotationSpeed: islandRotationSpeed,
-    oceanHeight: oceanHeight,
-    waveSpeed: waveSpeed,
-    waterColor: waterColor,
-    waterOpacity: waterOpacity,
-    waveIntensity: waveIntensity,
+    islandRotationSpeed: 0.3,
+    oceanHeight: 0,
+    waveSpeed: 0.02,
+    waterColor: 0x68c3c0,
+    waterOpacity: 0.7,
+    waveIntensity: 1.8,
     toggleDayNight: () => {
         if (isDay) {
             lightingAngle = 1;
             scene.add(skyboxNight);
             scene.add(moonLight);
-            scene.add(moonLightHelper);
             scene.remove(skyboxDay);
             scene.remove(sunLight);
-            scene.remove(sunLightHelper);
         } else {
             lightingAngle = 0.5;
             scene.add(skyboxDay);
             scene.add(sunLight);
-            scene.add(sunLightHelper);
             scene.remove(skyboxNight);
             scene.remove(moonLight);
-            scene.remove(moonLightHelper);
         }
         lightCycleTracker = 0;
         isDay = !isDay;
@@ -172,8 +158,6 @@ function animateLighting() {
     lightingAngle += guiParams.time;
     lightCycleTracker += guiParams.time;
 
-    sunLightHelper.update();
-    moonLightHelper.update();
     if (lightingAngle >= 1) {
         lightingAngle = 0;
     }
@@ -183,9 +167,9 @@ function animateLighting() {
     }
 
     var phi = 2 * Math.PI * (lightingAngle - 0.5);
-    sunLight.position.x = 400 * Math.cos(phi);
-    sunLight.position.y = 400 * Math.sin(phi) * Math.sin(0.5);
-    sunLight.position.z = 400 * Math.sin(phi) * Math.sin(0.5);
+    sunLight.position.x = 500 * Math.cos(phi);
+    sunLight.position.y = 500 * Math.sin(phi) * Math.sin(0.5);
+    sunLight.position.z = 500 * Math.sin(phi) * Math.sin(0.5);
 
     moonLight.position.x = -sunLight.position.x;
     moonLight.position.y = -sunLight.position.y;
@@ -193,9 +177,7 @@ function animateLighting() {
 }
 
 // Prefer onFinishChange() to reduce re-render calls. If change is immediate use onChange()
-gui.add(guiParams, 'islandRotationSpeed', 0, 5).onFinishChange(val => {
-    islandRotationSpeed = val;
-});
+gui.add(guiParams, 'islandRotationSpeed', 0, 2);
 gui.open();
 
 const treeControlUI = gui.addFolder('Tree Controls');
@@ -207,51 +189,44 @@ treeControlUI.open();
 const environmentControlUI = gui.addFolder('Environment Controls');
 environmentControlUI.add(guiParams, 'toggleDayNight');
 environmentControlUI.add(guiParams, 'cycleWeather');
-environmentControlUI
-    .add(guiParams, 'time', 0.00005, 0.002)
-    .onFinishChange(val => {
-        guiParams.time = val;
-    });
+environmentControlUI.add(guiParams, 'time', 0.00005, 0.002);
 environmentControlUI
     .addColor(guiParams, 'sunLightColor')
     .onFinishChange(val => {
         sunLight.color = new THREE.Color(val);
+        sunLightSphere.material.setValues({ color: val });
     });
 environmentControlUI
     .addColor(guiParams, 'moonLightColor')
     .onFinishChange(val => {
         moonLight.color = new THREE.Color(val);
+        moonLightShpere.material.setValues({ color: val });
     });
 environmentControlUI.open();
 
 const oceanControlUI = gui.addFolder('Ocean Controls');
 oceanControlUI
     .add(guiParams, 'oceanHeight', -1, 10, 0.1)
-    .onFinishChange(val => {
-        oceanHeight = val;
-        ocean.mesh.position.y = oceanHeight;
-    });
+    .onFinishChange(val => (ocean.mesh.position.y = val));
+oceanControlUI.add(guiParams, 'waveSpeed', 0.01, 0.2);
+oceanControlUI.add(guiParams, 'waveIntensity', 0.1, 4.5);
 oceanControlUI
-    .add(guiParams, 'waveSpeed', 0.01, 0.2)
-    .onFinishChange(val => (waveSpeed = val));
+    .add(guiParams, 'waterOpacity', 0.2, 1)
+    .onFinishChange(() =>
+        ocean.mesh.material.setValues({ opacity: guiParams.waterOpacity })
+    );
 oceanControlUI
-    .add(guiParams, 'waveIntensity', 0.1, 4.5)
-    .onFinishChange(val => (waveIntensity = val));
-oceanControlUI.add(guiParams, 'waterOpacity', 0.2, 1).onFinishChange(val => {
-    waterOpacity = val;
-    ocean.mesh.material.setValues({ opacity: waterOpacity });
-});
-oceanControlUI.addColor(guiParams, 'waterColor').onFinishChange(val => {
-    waterColor = val;
-    ocean.mesh.material.setValues({ color: waterColor });
-});
+    .addColor(guiParams, 'waterColor')
+    .onFinishChange(() =>
+        ocean.mesh.material.setValues({ color: guiParams.waterColor })
+    );
 oceanControlUI.open();
 
 // Scene Animation (called 60 times/sec). This should call other functions that updates objects
 function animate() {
     fpsCounter.begin();
-    islandObject.rotateY(islandRotationSpeed / 100);
-    ocean.animateWaves(waveSpeed, waveIntensity);
+    islandObject.rotateY(guiParams.islandRotationSpeed / 100);
+    ocean.animateWaves(guiParams.waveSpeed, guiParams.waveIntensity);
     if (weatherMode === 'rainy') {
         rain.animateRainDrop();
     } else if (weatherMode === 'snowy') {

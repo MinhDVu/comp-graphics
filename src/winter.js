@@ -41,21 +41,17 @@ export default class Snow {
             snowFlake.z += Math.random() * 0.3;
 
             //if the snow go to the max coordinate, it will restart the animation again from the specific coordinate
-            if (snowFlake.x < -800) 
-            {
+            if (snowFlake.x < -800) {
                 snowFlake.x = 800;
             }
             //if (snowFlake.x > 1600) snowFlake.x = -1600;
-            if (snowFlake.y < -400) 
-            {
+            if (snowFlake.y < -400) {
                 snowFlake.y = 400;
             }
-            if (snowFlake.z < -800)
-            { 
+            if (snowFlake.z < -800) {
                 snowFlake.z = 800;
             }
-            if (snowFlake.z > 800) 
-            {
+            if (snowFlake.z > 800) {
                 snowFlake.z = -800;
             }
         }

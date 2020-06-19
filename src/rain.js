@@ -41,13 +41,11 @@ export default class Rain {
     }
 
     animateRainDrop() {
-        for (let rainDrop of this.rainSystem.geometry.vertices) 
-        {
+        for (let rainDrop of this.rainSystem.geometry.vertices) {
             rainDrop.velocity -= 0.9 + Math.random() * 0.9;
             //increase the velocity along with the gravity
             rainDrop.y += rainDrop.velocity;
-            if (rainDrop.y < -400) 
-            {
+            if (rainDrop.y < -400) {
                 rainDrop.y = 400;
                 rainDrop.velocity = 0;
             }
