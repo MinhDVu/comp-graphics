@@ -14,7 +14,7 @@
         "dat.gui": "^0.7.7",
         "file-loader": "^6.0.0",
         "stats.js": "^0.17.0",
-        "three": "^0.114.0",
+        "three": "^0.125.0",
         "three-orbit-controls": "^82.1.0"
     },
     "devDependencies": {
